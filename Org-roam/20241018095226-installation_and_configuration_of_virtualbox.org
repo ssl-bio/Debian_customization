@@ -1,0 +1,66 @@
+:PROPERTIES:
+:ID:       72b810c5-c9e8-449c-b1ca-a8f730167230
+:END:
+#+title: Installation and configuration of Virtualbox
+#+filetags: :virtualbox:debian:
+
+The following commands will download and install virtualbox on Debian
+* Installation 
+** Manual way
+Check the [[https://www.virtualbox.org/wiki/Linux_Downloads][download links]]
+
+#+begin_src bash
+vbox_url https://download.virtualbox.org/virtualbox/7.1.4/virtualbox-7.1_7.1.4-165100~Debian~bookworm_amd64.deb -O vbox.deb
+  wget 
+
+  if ! dpkg -l | grep -q virtualbox; then
+      sudo dpkg -i vbox.deb
+  fi
+#+end_src
+
+#+begin_src bash
+  # As root run
+  /sbin/vboxconfig 
+#+end_src
+
+** Add a repository
+#+begin_src bash
+  # Import the VirtualBox-signed GPG keys
+  wget --tries=2 --retry-connrefused --waitretry=10 -qO- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox.gpg
+
+  # Change the mod of the key
+  sudo chmod 644 /usr/share/keyrings/oracle-virtualbox.gpg
+
+  # Add the repository
+  echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox.gpg] http://download.virtualbox.org/virtualbox/debian $(lsb_release -sc) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
+
+  # Change the mod of the key
+  sudo chmod 644 /etc/apt/sources.list.d/virtualbox.list
+
+  # Update repositories
+  if ! dpkg -l | grep -q virtualbox; then
+      apt update && apt install virtualbox-7.1 -y
+  fi
+#+end_src
+* Install guest additions
+** Linux guest
+- Install dependencies
+- Create a directory where to mount files
+- Insert guest-additions image
+- Mount image
+- Install guest-additions for Linux
+  #+begin_src bash
+    sudo apt update
+    sudo apt install build-essential dkms linux-headers-$(uname -r)
+    sudo mkdir -p /mnt/cdrom
+    # Insert CD image using the menu
+    sudo mount /dev/cdrom /mnt/cdrom
+    cd /mnt/cdrom || exit
+    sudo ./VBoxLinuxAdditions.run
+  #+end_src
+* Back-links
+[[[id:ca223956-34a0-457f-91f4-13fb213db673][Debian customization]]] [[[id:c3cf1e06-fdb1-42a8-bebd-cddae74dd1b6][List of applications]]]
+
+* Web links
+- [[https://linuxiac.com/how-to-install-virtualbox-on-debian-12-bookworm/][Install Virtualbox on Debian 12]]
+- [[https://linuxconfig.org/install-virtualbox-guest-additions-on-linux-guest][Install guest-additions on Linux guest]]

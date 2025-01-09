@@ -1,0 +1,58 @@
+:PROPERTIES:
+:ID:       14781a06-5a9d-4f8c-8c41-1900a555b261
+:END:
+#+title: Anaconda configuration
+#+filetags:  :anaconda:miniconda:python:
+
+* Description
+The following commands will expand the default channels, install some programs to the base environment
+
+* Installation
+#+begin_src bash
+  miniconda_dir="~/.local/bin/miniconda3"
+  miniconda_url="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+  cd "$idownload" || exit
+  if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
+      wget --tries=2 --retry-connrefused --waitretry=10 "$miniconda_url"
+  fi
+  chmod +x Miniconda3-latest-Linux-x86_64.sh
+  bash Miniconda3-latest-Linux-x86_64.sh -b -p "${miniconda_dir}"
+  # Add initialization code to bashrc and reload
+  "${miniconda_dir}"/condabin/conda init "$(echo $SHELL | awk -F/ '{print $NF}')"
+  eval "$($miniconda_dir/bin/conda shell.bash hook)"
+#+end_src
+
+* Add channels
+#+begin_src bash
+  # Show channels
+  conda config --show channels
+
+  # Añade el canal por defecto (defaults) a la lista de canales
+  conda config --add channels defaults
+
+  # Añade el canal bioconda a la lista de canales
+  conda config --add channels bioconda
+
+  # Añade el canal conda-forge a la lista de canales
+  conda config --add channels conda-forge
+
+  # Indicar se respete el orden de paquetes (mayor consistencia)
+  conda config --set channel_priority strict
+#+end_src
+
+* Change channels manually
+Edit the file =~/.condarc=
+
+* Add packages to the base environment
+- *black*: A Python code formatter that enforces a consistent coding style by reformatting code to its opinionated standard.  
+- *jedi*: An autocompletion and static analysis library for Python, used in IDEs and editors for code insights.  
+- *autopep8*: A tool to automatically format Python code to comply with the PEP 8 style guide.  
+- *flake8*: A linting tool that checks Python code for style errors, PEP 8 compliance, and common bugs.  
+- *ipython*: An enhanced interactive Python shell offering features like syntax highlighting, auto-completion, and magic commands.  
+- *importmagic*: A library for auto-importing and organizing imports in Python files.  
+- *yapf*: A Python code formatter that reformats code to align with the PEP 8 style guide or user-defined styles.
+  #+begin_src bash
+pip3 install black jedi autopep8 flake8 ipython importmagic yapf
+  #+end_src
+* Back-links
+[[[id:ca223956-34a0-457f-91f4-13fb213db673][Debian customization]]] [[[id:c3cf1e06-fdb1-42a8-bebd-cddae74dd1b6][List of applications]]]

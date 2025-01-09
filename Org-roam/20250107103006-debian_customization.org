@@ -1,0 +1,678 @@
+:PROPERTIES:
+:ID:       ca223956-34a0-457f-91f4-13fb213db673
+:END:
+#+title: Debian customization
+#+filetags: :debian:installation:configuration:
+* Description
+This node provides a series of instructions are presented to customize a bare Debian (estable) installation with Mate desktop environment.
+* Main customization
+** Add backports
+  - Install emacs from backports [[[https://backports.debian.org/Instructions/][Official documentation]]]
+  #+begin_src bash :dir "/sudo::"
+    # Check if backports had been enabled
+    ifile='/etc/apt/sources.list.d/backports.list'
+    if [ ! $ifile ]; then
+        sudo touch ${ifile}
+        echo 'deb http://deb.debian.org/debian bookworm-backports main' |
+    	sudo tee ${ifile}
+    else
+        if ! grep -q "bookworm-backports" "$ifile"; then
+    	echo 'deb http://deb.debian.org/debian bookworm-backports main' |
+    	    sudo tee -a ${ifile}
+        fi
+    fi
+    sudo apt update
+    # Install emacs from backports to ensure it is 29
+    sudo apt install -t bookworm-backports emacs -y
+  #+end_src
+** Install first batch of programs
+  - System Configuration
+    - =dconf-cli=: A command-line tool for managing system and application settings stored in dconf databases.
+    - =dconf-editor=: A graphical utility for browsing and modifying settings in the dconf database, allowing for advanced system customization.
+  - Security
+    - =seahorse=: A graphical frontend for managing GNOME keyrings and GPG encryption keys.
+    - =clamav=: An open-source antivirus engine designed to detect and remove malicious software, including viruses and malware, on Linux systems.
+    - =clamtk=: A graphical front end for ClamAV, providing a user-friendly interface for antivirus scanning.
+  - Firewall and Network
+    - =ufw=: A command-line tool for managing the uncomplicated firewall in Linux.
+    - =gufw=: A graphical user interface for UFW, providing an easier way to manage firewall rules.
+    - =curl=: A command-line tool for transferring data with URLs, supporting a wide range of protocols such as HTTP, FTP, and more.
+  - Version Control and Development
+    - =git=: A distributed version control system for tracking changes in source code.
+    - =build-essential=: A package that includes essential tools for compiling and building software on Linux, such as GCC, make, and libraries for compiling C and C++ programs.
+    - =cmake=: A cross-platform build system generator that simplifies the process of compiling and managing software projects by generating native build environments.
+   - Networking / File synchronization      
+    - =curl=:  A command-line tool used to transfer data to or from a server using various network protocols such as HTTP, HTTPS, FTP, and more.
+    - =rsync=: A command-line utility for syncing and transferring files across systems.
+  - Terminal
+    - =tilix=: A tiling terminal emulator that allows managing multiple terminal sessions in a single window.
+    - =fzf=: A fast, interactive command-line fuzzy finder that allows you to search and select from a list of files, directories, or other items.
+    - =zoxide=: A smarter `cd` command that keeps track of frequently accessed directories and allows quick navigation to them using a ranking algorithm
+  - Dock
+    - =plank=: A lightweight dock application.
+  - Window management
+    - =compiz-mate=: The Compiz window manager integrated with the Mate desktop.
+    - =emerald=: A window decorator for Compiz.
+  #+begin_src bash  :dir "/sudo::"
+      sudo apt install git build-essential cmake curl rsync seahorse clamav clamtk tilix fzf zoxide ufw gufw dconf-cli dconf-editor plank compiz-mate emerald -y
+  #+end_src
+** Expand repositories
+  - Add the =contrib= source of software. 
+    It is used for software that is free and open-source (in compliance with the Debian Free Software Guidelines) but depends on non-free components to function fully.
+  #+begin_src bash :dir "/sudo::"
+    # Create a copy of the sources.list and add the contrib source
+    if [  ! -f /etc/apt/sources.list.bak ]; then
+        cp /etc/apt/sources.list /etc/apt/sources.list.bak
+    fi
+    sudo sed -i '/^deb/{/debian\.org/{/ contrib /!s/ main / main contrib /}}' /etc/apt/sources.list
+  #+end_src
+** Add deb-multimedia. 
+  The deb-multimedia repository (https://deb-multimedia.org/) is an unofficial repository for Debian-based systems, providing additional multimedia packages and codecs not included in the official Debian repositories due to licensing or patent restrictions.
+  #+begin_src bash :dir "/sudo::"
+    deb_multimedia_url="https://www.deb-multimedia.org/pool/main/d/deb-multimedia-keyring/deb-multimedia-keyring_2024.9.1_all.deb"
+    isources="/etc/apt/sources.list"
+    # Check if deb multimedia has been installed already
+    if ! grep -q "deb-multimedia.org" "$isources"; then
+        wget --tries=2 --retry-connrefused --waitretry=10 "$deb_multimedia_url" -O deb-multimedia.deb
+        sudo dpkg -i deb-multimedia.deb
+        echo "
+    # Deb multimedia
+    deb https://www.deb-multimedia.org bookworm main non-free" |\
+    	sudo tee -a "$isources"
+        sudo apt update && sudo apt dist-upgrade -y
+    fi
+  #+end_src
+** Add configuration for fzf and zoxide to =.bashrc=
+  #+begin_src bash
+    # Backup .bashrc
+    if [ ! -f "$HOME"/.bashrc.bak ]; then 
+        sudo -u "$user_name" cp "$HOME"/.bashrc "$HOME"/.bashrc.bak
+    fi
+    # Add fzf and zoxide configuration
+    if ! grep -q "zoxide" "$HOME/.bashrc"; then
+        msg 'Adding configuration for fzf and zoxide to =.bashrc=...'
+        echo '
+                    # fzf shortcuts
+                    source /usr/share/doc/fzf/examples/key-bindings.bash
+                    # zoxide
+                    eval "$(zoxide init bash)"' >> "$HOME/.bashrc"
+        sed -i 's/^[ \t]*//' "$HOME/.bashrc"
+    fi
+  #+end_src
+** Clone repository with configuration files
+Clone a GitHub repository with customized configuration files. The following command will clone a number of configuration files into the user home directory in a folder named =debian_customization=. This will be referred latter for customizing the following programs:
+- Albert
+- Compiz
+- Mate DE
+- Quicktile
+- Tilix
+- LaTeX
+  #+begin_src bash
+    # Define variable for this directory
+    custom_dir="$HOME/debian_customization"
+    git clone debian_customization "$custom_dir"
+  #+end_src
+** Configure =ufw= [[[id:34941011-eb5b-47d3-8e4c-989aab83dc59][note]]]
+  The following code will block ports listed on the page: [[High-Risk Ports: What Are the Common High-Risk Ports and How to Block Them][High-Risk Ports: What Are the Common High-Risk Ports and How to Block Them]]. See a [[id:34941011-eb5b-47d3-8e4c-989aab83dc59][note]] explain each port
+  #+begin_src bash :dir "/sudo::"
+    sudo ufw enable
+    blocked_ports=("53" "135" "137:139" "161" "389" "445")
+    protocols=("udp" "tcp")
+    for iport in "${blocked_ports[@]}"; do
+        for iproto in "${protocols[@]}"; do
+       sudo ufw deny proto $iproto to any port $iport
+        done
+    done
+    blocked_ports=("20" "21" "22" "23" "25" "69" "3389" "5900:5902" "512:514" "873" "111" "2049" "110" "143" "80" "8000" "8080" "8888" "1433" "1521" "3306" "5000" "5432" "6379" "27017:27018")
+    for iport in "${blocked_ports[@]}"; do
+        sudo ufw deny proto tcp to any port $iport
+    done
+  #+end_src
+** Add Nerd Fonts Symbols [[[id:44c74583-b614-4e3f-b223-4e4845f3bf03][note]]]
+These are necessary to correctly show symbols in Emacs and Yazi. The code below will download the font package and installed system-wide. 
+  #+begin_src bash :dir "/sudo::"
+    nerd_url='https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/NerdFontsSymbolsOnly.tar.xz'
+    font_dir="/usr/share/fonts/truetype"
+    if [ ! -f NerdFontsSymbolsOnly.tar.xz ]; then
+        wget --tries=2 --retry-connrefused --waitretry=10 "$nerd_url"
+    fi
+    mkdir SymbolsNerdFont
+    tar -xf NerdFontsSymbolsOnly.tar.xz -C "SymbolsNerdFont"
+    sudo mv SymbolsNerdFont "$font_dir"
+    # Rebuild font cache
+    fc-cache -f -v
+  #+end_src
+** Setup Emacs
+  Clone a  [[https://github.com/ssl-bio/emacs_conf][GitHub]] repository (adapted by me) for customizing Emacs.
+  #+begin_src bash
+    if [ -d "$HOME"/.emacs.d/ ]; then
+        cd "$HOME"/.emacs.d/ || exit
+        if ! git branch --list "straight_no_helm" > /dev/null 2>&1; then
+    	# Backup directory
+    	cd ..
+    	mv "$HOME"/.emacs.d/ "$HOME"/.emacs.d_bk0
+        fi
+    fi
+    # Clone the configuration file and check the no_helm branch
+    git clone https://github.com/ssl-bio/emacs_conf.git ~/.emacs.d
+    cd ~/.emacs.d/ || exit
+    git checkout straight_no_helm
+    cd ..
+  #+end_src
+** Install Quicktile [[[id:b6346e34-d2ae-46f6-b4c9-9facb05e1990][note]]]
+  Quicktile is a window manager for quickly arranging windows into tiling layouts on Linux. The following commands will clone, install and customize Quicktile. The latter will define keyboard combinations for arranging the windows. 
+  #+begin_src bash :dir "/sudo::"
+    custom_dir="~/debian_customization"
+    # Dependencies
+    sudo apt install python3 python3-pip python3-setuptools python3-gi python3-xlib python3-dbus gir1.2-glib-2.0 gir1.2-gtk-3.0 gir1.2-wnck-3.0 -y
+    # Clone
+    if [ ! -d quicktile ]; then
+        git clone https://github.com/ssokolow/quicktile.git quicktile
+    fi
+    cd quicktile || exit
+    sudo ./install-sh
+    cd ..
+    # Generate configuration file, create a backup and overwrite
+    # with the one from the customization repo
+    config_file="$HOME"/.config/quicktile.cfg
+    if [ ! -f "$config_file" ]; then
+        quicktile &
+        mv "$HOME"/.config/quicktile.cfg "$HOME"/.config/quicktile.cfg_bk0
+    fi
+    cp ${custom_dir}/quicktile/quicktile.cfg ~/.config/quicktile.cfg
+    # Start quicktile
+    quicktile &
+  #+end_src
+** Install Albert launcher [[[id:c3ba7bf5-60da-4c85-a813-2334efad5e15][note]]]
+The following are commands to install albert launcher on Debian. Albert is a plugin-based keyboard launcher.
+  #+begin_src bash :dir "/sudo::"
+    custom_dir="~/debian_customization"
+    if ! dpkg -l | grep -q albert; then
+        # Add repository
+        echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/Debian_12/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
+        curl -fsSL https://download.opensuse.org/repositories/home:manuelschneid3r/Debian_12/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_manuelschneid3r.gpg > /dev/null
+        # Update and install Albert
+        sudo apt update && sudo apt install albert -y
+    fi
+    # Backup configuration and replace with custom one
+    if [  -f ~/.config/albert.conf ] && [ ! -f ~/.config/albert.conf.bk ]; then
+        cp ~/.config/albert.conf ~/.config/albert.conf.bk
+    fi
+    cp "${custom_dir}"/albert/albert.conf ~/.config/albert.conf
+    # Start albert
+    albert &
+  #+end_src
+** Restore =Tilix= configuration [[[id:b4594a5a-f1ab-4eea-b12e-f8c1d6bf19d9][note]]]
+  The last two commands will re/define keybindings. 
+  #+begin_src bash
+    # Directory with customization files
+    custom_dir=~/debian_customization
+    # Backup default settings
+    # Keybindings
+    dconf dump /com/gexperts/Tilix/keybindings/ > "${custom_dir}"/tilix/tilix_default_keybindings
+    # Profiles
+    dconf dump /com/gexperts/Tilix/profiles/ > "${custom_dir}"/tilix/tilix_default_profiles
+    # Replace custom settings
+    # Keybidings
+    dconf load /com/gexperts/Tilix/keybindings/ < "${custom_dir}"/tilix/tilix_custom_keybindings
+    # Profiles
+    dconf load /com/gexperts/Tilix/profiles/ < "${custom_dir}"/tilix/tilix_custom_profiles
+  #+end_src
+** Setup Compiz [[[id:7bc647cc-bf19-4cd3-8473-899a45480551][note]]]
+Compiz is a compositing window manager for X11 that provides advanced graphical effects and features.
+  #+begin_src bash
+    # Directory with customization files
+    custom_dir=~/debian_customization
+    # Backup profile
+    backup_file="${custom_dir}"/compiz/compiz_bookworm_default.profile
+    if [ ! "$backup_file" ]; then
+        dconf dump /org/compiz/ > "$backup_file"
+    fi
+    # Replace profile with custom one
+    dconf load /org/compiz/ < "${custom_dir}"/compiz/compiz_bookworm_custom.profile.
+    # Load Compiz
+    compiz --replace &
+  #+end_src
+** Customize panels.
+  Remove the bottom panel, reduce the top one, set it to auto-hide and  change the menu for a compact alternative. The idea is to use =Albert= to launch applications and =Plank= to dock them thus there shouldn´t be much use for the top panel such as containing indicators.
+  #+begin_src bash
+    custom_dir="~/debian_customization"
+    backup_file="${custom_dir}"/Mate_DE/panel/mate-panel-debian-default-backup.dconf
+    if [ ! -f "$backup_file" ]; then
+        dconf dump /org/mate/panel/ > "${backup_file}"
+    fi
+    # Replace configuration with custom one
+    dconf load /org/mate/panel/ < "${custom_dir}"/Mate_DE/panel/mate-panel-debian-custom.dconf
+    # Launch plank
+    plank &
+  #+end_src
+** Add to the list of startup applications
+Add Albert, Compiz, and Plank to the list of startup applications
+#+begin_src bash
+  # Define directories
+  startup_dir="$HOME"/.config/autostart
+  custom_dir="$HOME"/debian_customization
+  rsync -rlptz "${custom_dir}"/Mate_DE/autostart/ "${startup_dir}"/
+#+end_src
+** Configure flatpak
+  Flatpak is a software deployment and package management system for Linux that delivers applications in a sandboxed environment. It often provides more up-to-date software compared to traditional repositories. Other similar systems include /Snap/, developed by Canonical, which also offers sandboxing and cross-distro support.
+  #+begin_src bash :dir "/sudo::"
+      # Install flatpak
+      sudo apt install flatpak -y
+      # Add repo
+      flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  #+end_src
+  - Example: Install Thunderbird. 
+  #+begin_src bash
+    flatpak install flathub org.mozilla.Thunderbird -y
+  #+end_src
+* Further customization with additional programs [Optional]
+** Description
+  - Version Control and Development
+    - =git-lfs=: An extension for Git to handle large files more efficiently, such as binaries or media files.
+  - Peripherals / Scanning / Input
+    - =xsane=: A scanning application for SANE-supported scanners.
+    - =ibus=: An input method framework for multilingual input.
+  - System Monitoring / Utilities
+    - =htop=: An interactive process viewer for Unix systems.
+    - =tree=: A directory listing program that displays a tree structure.
+    - =bsdmainutils=: A collection of utilities common to BSD systems.
+    - =macchanger=: A tool to change the MAC address of a network device.
+    - =gparted=: A graphical partition editor for managing disk partitions, including creating, resizing, and formatting them.
+    - =keepassxc=: A secure, open-source password manager for managing and storing passwords locally.    
+  - Mate Desktop Environment
+    - =mate-dock-applet=: A dock-like applet for the Mate panel.
+    - =mate-desktop-environment-extra=: Additional tools and utilities for the Mate desktop environment.
+    - =caja-open-terminal=: Adds an "Open Terminal" option to Caja, the Mate file manager.
+    - =mozo=: A menu editor for the Mate desktop environment.
+  - Multimedia
+    - =audacity=: An audio recording and editing software.
+    - =sayonara=: A lightweight music player.
+    - =vlc=: A versatile media player.
+    - =obs-studio=: A tool for video recording and live streaming.
+    - =openshot-qt=: A video editing tool.
+    - =puddletag=: An audio tag editor.
+    - =cuetools=: A set of utilities for .cue sheet handling.
+  - Graphics / Design
+    - =inkscape=: A vector graphics editor.
+    - =gimp=: A raster graphics editor for image manipulation.
+  - Document Management
+    - =calibre=: An e-book management tool.
+    - =pdftk=: A tool for manipulating PDF files.
+    - =tesseract-ocr=: An OCR (Optical Character Recognition) engine for extracting text from images or PDFs.
+    - =pdfarranger=: A lightweight tool for rearranging, splitting, merging, and rotating pages within PDF files.
+    - =krop=:  A simple and intuitive tool for cropping and splitting PDF pages
+  - File Sharing
+    - =transmission=: A BitTorrent client.
+  - Development Tools
+    - =meld=: A visual diff and merge tool.
+    - =libhandy-1-dev=: A library for creating adaptive GNOME applications.
+    - =sqlitebrowser=: A GUI-based SQLite database editor.
+  - Other / Miscellaneous
+    - =goldendict=: A dictionary application.
+    - =redshift=: A screen temperature adjustment tool.
+** Load helper functions from =.bashrc=
+The =.bashrc= file is a shell script that runs whenever a new terminal session is started in interactive, non-login mode. It is specific to the Bash shell and is used to configure and customize the shell environment for the user. The following commands will create a backup of the file, copy a file with helper functions (=.bash_functions=) and add a command to load it from =.bashrc=. This is necessary step only if the following commands are run from within this file. Alternatively, one can define the functions (below) in the terminal before running some commands.
+  #+begin_src bash
+    custom_dir="$HOME/debian_customization"
+    # Create a backup
+    if [ ! -f  "$HOME"/.bashrc.bak ]; then
+        cp "$HOME"/.bashrc "$HOME"/.bashrc.bak
+    fi
+    # Add code to load custom functions (if present)
+    echo '
+        # Import custom functions
+            if [ -f "$HOME"/.bash_functions ]; then
+                . "$HOME"/.bash_functions
+            fi'
+    # Copy file with custom funtions and reload
+    cp "${custom_dir}"/bash/.bash_functions "$HOME"/.bash_functions
+    source "$HOME"/.bashrc
+  #+end_src
+  #+begin_src bash
+    msg() {
+        local msg=$1             
+        local inum=${#msg}
+        ((inum=inum+2))
+        printf "%0.s-" $(seq 1 "$inum")
+        echo -e "\n ${msg}"
+        printf "%0.s-" $(seq 1 "$inum")
+        echo -e "\n"
+    }
+    # Exit status message
+    check_exit_status() {
+        if [[ $? -eq 0 ]]; then
+    	clear
+    	msg "[o] No errors reported"
+        else
+    	msg "[x] Errors reported"
+        fi
+    }
+    # Get user directory as defined in ~/.config/user-dirs.dirs
+    get_user_dir() {
+        local user_dir="$1"
+        local var_name="$2"
+        # if [[ -z "${!var_name}" ]]; then
+        local temp
+        temp=$(grep "^${user_dir}=" ~/.config/user-dirs.dirs | sed "s/${user_dir}=//g")
+        local resolved_dir
+        resolved_dir="$(eval echo "$temp")"
+        # Dynamically assign the value to the variable name passed as $2
+        printf -v "$var_name" "%s" "$resolved_dir"
+        # fi
+    }
+    # Check if dir exists if not create it
+    dir_exist() {
+        if [[ ! -d $1 ]]
+        then
+    	mkdir -p "$1"
+        fi
+    }
+  #+end_src
+** Install dependencies for optional programs
+    #+begin_src bash :dir "/sudo::"
+      # Emacs-related
+      sudo apt install pandoc -y
+      # Dependecies for anaconda/R
+      sudo apt install libharfbuzz-dev libfribidi-dev libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev libcurl4-openssl-dev libxml2-dev -y
+      # Snapgene viewer
+      sudo apt install ttf-mscorefonts-installer -y
+      #Firmware and drivers
+      sudo apt install firmware-linux-nonfree blueman printer-driver-gutenprint xsane -y
+      # Laptop specific
+      # sudo apt install firmware-realtek -y
+  #+end_src
+** Install second batch of programs
+  #+begin_src bash
+    # Version control
+    sudo apt install git-lfs -y
+    # Peripherals / Scanning / Input
+    sudo apt install ibus -y
+    # System Monitoring / Utilities
+    sudo apt install htop tree bsdmainutils macchanger gparted keepassxc -y
+    # Mate Desktop Environment
+    sudo apt install mate-dock-applet mate-desktop-environment-extra caja-open-terminal mozo -y
+    # Multimedia
+    sudo apt install audacity sayonara vlc obs-studio openshot-qt puddletag cuetools -y
+    # Graphics / Design
+    sudo apt install inkscape gimp -y
+    # Document Management
+    sudo apt install calibre pdftk tesseract-ocr pdfarranger krop -y
+    # File Sharing / Synchronization
+    sudo apt install transmission -y
+    # Development Tools
+    sudo apt install meld libhandy-1-dev sqlitebrowser -y
+    # Other / Miscellaneous
+    sudo apt install goldendict redshift -y
+  #+end_src
+** Install and configure Rclone [[[id:e4c9f06e-7b48-4778-bae2-c63506922f5d][note]]]
+Rclone (https://rclone.org/) is a command-line tool for managing files on cloud storage and other remote file systems.
+  #+begin_src bash :dir "/sudo::"
+    # Use custom function to get download dir
+    get_user_dir XDG_DOWNLOAD_DIR idownload
+    # Check https://rclone.org/downloads/ for the latest version
+    rclone_url="https://downloads.rclone.org/v1.68.2/rclone-v1.68.2-linux-amd64.deb"
+    cd "$idownload" || exit
+    if [ ! -f rclone.deb ]; then
+        wget --tries=2 --retry-connrefused --waitretry=10 ${rclone_url} -O rclone.deb
+    fi
+    if ! dpkg -l | grep -q rclone; then
+        sudo dpkg -i rclone.deb
+    fi
+  #+end_src
+** Install and configure Zotero [[[id:5aca015f-ea56-4a89-90da-e6924b04b7fc][note]]]
+Zotero (https://www.zotero.org/) is a research and citation management tool for collecting, organizing, and citing references. The following commands will download zotero and move it to a custom directory (=~/.local/bin/=) and add it to the menu of applications
+  #+begin_src bash
+    # Download Zotero
+    get_user_dir XDG_DOWNLOAD_DIR idownload
+    dir_exist ~/.local/bin
+    zotero_dir=~/.local/bin/
+    # Check https://www.zotero.org/download/ for the latest version
+    zotero_url="https://www.zotero.org/download/client/dl?channel=release&platform=linux-x86_64&version=7.0.11"
+    cd "$idownload" || exit
+    if [ ! -f Zotero.tar.bz2 ]; then
+        wget --tries=2 --retry-connrefused --waitretry=10 "${zotero_url}" -O Zotero.tar.bz2
+    fi
+    # Extract files to custom dir
+    tar -xf Zotero.tar.bz2 -C ${zotero_dir}
+    # Add launcher to menu
+    "${zotero_dir}"/Zotero_linux-x86_64/./set_launcher_icon
+    ln -s "${zotero_dir}"/Zotero_linux-x86_64/zotero.desktop "$HOME"/.local/share/applications/zotero.desktop
+    # Include zotero dir into path
+    echo '
+    export PATH="$HOME/.local/bin/Zotero_linux-x86_64:$PATH"' |\
+        tee -a "$HOME"/.bashrc
+    #+end_src
+** Install Hugo [[[id:e4f8cd3b-3018-4819-a2d1-025dff28f599][note]]]
+Hugo (https://gohugo.io/) is a fast, open-source static site generator for building websites using Markdown and templates.
+  #+begin_src bash :dir "/sudo::"
+    get_user_dir XDG_DOWNLOAD_DIR idownload
+    # Check https://github.com/gohugoio/hugo/releases/latest for the latest release
+    hugo_url="https://github.com/gohugoio/hugo/releases/download/v0.140.0/hugo_extended_0.140.0_linux-amd64.deb"
+    cd "$idownload" || exit
+    if [ ! -f hugo.deb ];then
+        wget --tries=2 --retry-connrefused --waitretry=10 "${hugo_url}" -O hugo.deb    
+    fi
+    # Install 
+    if ! dpkg -l | grep -q hugo; then
+        sudo dpkg -i hugo.deb
+    fi
+  #+end_src
+** Install tor
+Tor (https://www.torproject.org/) is a privacy-focused browser that anonymizes internet activity by routing traffic through a global volunteer network.
+  #+begin_src bash
+    get_user_dir XDG_DOWNLOAD_DIR idownload
+    dir_exist ~/.local/bin
+    # Check https://www.torproject.org/download/ for the latest installation file
+    tor_url=https://www.torproject.org/dist/torbrowser/14.0.3/tor-browser-linux-x86_64-14.0.3.tar.xz
+    cd "$idownload" || exit
+if [ ! -f Tor_linux.tar.xz ]; then
+    wget --tries=2 --retry-connrefused --waitretry=10 ${tor_url} -O Tor_linux.tar.xz
+fi
+    tar -xf Tor_linux.tar.xz -C ~/.local/bin
+    # Register app
+    cd ~/.local/bin/tor-browser
+    ./start-tor-browser.desktop --register-app
+  #+end_src
+** Install and configure R
+R is a programming language and software environment for statistical analysis and data visualization. The following commands will add the Debian package repositories on [[https://cran.r-project.org/][CRAN]] using a key from the Ubuntu project. 
+#+begin_src bash :dir "/sudo::"
+  # Get the key
+  gpg --keyserver keyserver.ubuntu.com \
+      --recv-key '95C0FAF38DB3CCAD0C080A7BDC78B2DDEABC47B7'
+  # export key
+  gpg --armor --export '95C0FAF38DB3CCAD0C080A7BDC78B2DDEABC47B7' | \
+      sudo tee /etc/apt/trusted.gpg.d/cran_debian_key.asc
+  # Add source to sources.list
+  isources="/etc/apt/sources.list"
+  if ! grep -q "cloud.r-project.org" "$isources"; then
+      echo -e '\n#R (CRAN)\ndeb http://cloud.r-project.org/bin/linux/debian bookworm-cran40/' |\
+    	sudo tee -a "$isources"
+  fi
+  # install R
+  sudo apt update
+  sudo apt install r-base r-base-dev -y
+  #+end_src
+***  Install Bioconductor
+Bioconductor is an open-source, open-development project that provides tools for the analysis and comprehension of high-throughput genomic data. The following command will run an R script (=Bioconductor.R=) which will install a compatible version of Bioconductor for the R installation. Make sure that the script is in the same folder or alternatively start an R session as a super-user and run the commands below. Also make sure to check the requirements at https://www.bioconductor.org/install/.
+  #+begin_src bash :dir "/sudo::"
+    sudo Rscript Bioconductor.R
+  #+end_src
+   #+begin_src R
+    ## Check the latest version and its requirement at: https://www.bioconductor.org/install/
+    if (!require("BiocManager", quietly = TRUE))
+        install.packages("BiocManager")
+    BiocManager::install(version = "3.20")
+  #+end_src
+*** Install packages for formating code
+The following packages will help writing code by providing suggestions to avoid errors, style inconsistencies (=lintr=) as well as, automatic code formatting (=styler=). Run the command as a regular user or from a  normal R session.
+#+begin_src bash
+Rscript -e "dir.create(Sys.getenv('R_LIBS_USER'), recursive = TRUE); install.packages(c('lintr', 'styler'), repos='https://cran.rstudio.com/', lib=Sys.getenv('R_LIBS_USER'), quiet=TRUE)"
+#+end_src
+#+begin_src R
+      install.packages("lintr", "styler")
+  #+end_src
+** Install and configure TeXLive [[[id:5d37e04d-af50-4071-ad25-477efe49efee][note]]]
+TeXLive is a TeX distribution (available for Linux, Windows and MacOS) that provides a comprehensive set of programs, packages and fonts  to produce TeX documents. The following code contains 3 alternatives for a TeXLive installation. Two of them use a profile file (=texlive_*.profile=) that tell the installer what options to use during the installation whereas, the third option starts a GUI-based interactive installer.
+Regarding the installation that uses a profile file, the one active installs all the packages available (/i.e./ /full scheme/) where as the latter installs a basic scheme which is latter complemented with packages that I have selected based on my needs; the list of packages is in the =selected-packages= file inside the TeXLive folder (customization repository).
+Below is a copy of the =texlive_full.profile= file used for the installation. Line 1, indicates that a full installation (=scheme-full=) will be selected. 
+#+begin_src  bash -i :linenos inline
+  selected_scheme scheme-full
+  TEXDIR /usr/local/texlive/2024
+  TEXMFCONFIG ~/.texlive2024/texmf-config
+  TEXMFHOME ~/.texlive2024/
+  TEXMFLOCAL /usr/local/texlive/texmf-local
+  TEXMFSYSCONFIG /usr/local/texlive/2024/texmf-config
+  TEXMFSYSVAR /usr/local/texlive/2024/texmf-var
+  TEXMFVAR ~/.texlive2024/texmf-var
+  binary_x86_64-linux 1
+#+end_src
+#+begin_src bash :dir "/sudo::"
+  # Install dependencies
+  sudo apt install perl-tk tk tex-common texinfo lmodern -y
+  # Set up variables
+  custom_dir="~/debian_customization"
+  # profile_file="${custom_dir}/TeXLive/texlive_basic.profile"
+  profile_file="${custom_dir}/TeXLive/texlive_full.profile"
+  package_dir="${custom_dir}/TeXLive/"
+  texlive_url="https://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz"
+  install_dir="/usr/local/texlive"
+  # Download installer
+  get_user_dir XDG_DOWNLOAD_DIR idownload
+  cd "$idownload" || exit
+  if [ ! -f install-tl-unx.tar.gz ]; then
+      wget --tries=2 --retry-connrefused --waitretry=10 $texlive_url -O install-tl-unx.tar.gz
+  fi
+  mkdir temp_dir
+  tar -xvzf install-tl-unx.tar.gz -C temp_dir
+  mv temp_dir/install-tl-* "$idownload"/texlive_installer
+  rm -rf temp_dir
+  cd "$idownload"/texlive_installer || exit
+  # Manual installation
+  # sudo perl ./install-tl -gui
+  # Installation with script
+  sudo perl install-tl --profile="$profile_file"
+  # Create symlinks
+  sudo ln -s "${install_dir}"/2024/bin/x86_64-linux/* /usr/local/bin/
+  sudo ln -s "${install_dir}"/2024/texmf-dist/doc/man /usr/local/man
+  sudo ln -s "${install_dir}"/2024/texmf-dist/doc/info /usr/local/info
+  # Install selected packages
+  # cd "${custom_dir}"/TeXLive || exit
+  # sudo tlmgr install $(<selected-packages)
+  # Update font database
+  texlive_font="/etc/fonts/conf.d/09-texlive.conf"
+  if [ -f "$texlive_font" ]; then
+      sudo rm "$texlive_font"
+  fi
+  sudo ln -s /usr/local/texlive/2024/texmf-var/fonts/conf/texlive-fontconfig.conf "$texlive_font"
+  sudo fc-cache -fsv
+  #+end_src
+** Install Miniconda (Anaconda) [[[id:14781a06-5a9d-4f8c-8c41-1900a555b261][note]]]
+Anaconda/Miniconda are distributions for Python and R programming, especially for data science, with package management and environment support. Miniconda provides a reduced set of packages compared to the Anaconda but these can be expanded as needed. The following commands will download and install Miniconda in =~/.local/bin/miniconda3= then, it will add the list of channels for the installation of packages. Finally, it will update the base installation and install some packages for formatting Python code. 
+  #+begin_src bash
+    miniconda_dir="~/.local/bin/miniconda3"
+    miniconda_url="https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh"
+    get_user_dir XDG_DOWNLOAD_DIR idownload
+    cd "$idownload" || exit
+    if [ ! -f Miniconda3-latest-Linux-x86_64.sh ]; then
+        wget --tries=2 --retry-connrefused --waitretry=10 "$miniconda_url"
+    fi
+    chmod +x Miniconda3-latest-Linux-x86_64.sh
+    bash Miniconda3-latest-Linux-x86_64.sh -b -p "${miniconda_dir}"
+    # Add initialization code to bashrc and reload
+    "${miniconda_dir}"/condabin/conda init "$(echo $SHELL | awk -F/ '{print $NF}')"
+    eval "$($miniconda_dir/bin/conda shell.bash hook)"
+    # Configure repos
+    conda config --add channels bioconda
+    conda config --add channels conda-forge
+    # Update
+    conda update -n base -c conda-forge conda -y
+    # Install default packages for formating code
+    pip3 install black jedi autopep8 flake8 ipython importmagic yapf
+  #+end_src
+** Install Virtualbox [[[id:72b810c5-c9e8-449c-b1ca-a8f730167230][note]]]
+Virtualbox (https://www.virtualbox.org/) )is an open-source hypervisor for running virtual machines across various operating systems. There are a number of alternatives such as  VMware Workstation,  [[https://www.qemu.org/][QEMU]]/[[https://linux-kvm.org/page/Main_Page][KVM]],  Hyper-V or  [[https://apps.gnome.org/Boxes/][GNOME Boxes]]. The reason I picked Virtualbox is because I created an image in =.VHD= format which not many of the above programs can run (QEMU being an exception although I haven´t try it). 
+  #+begin_src bash :dir "/sudo::"
+    # Import the VirtualBox-signed GPG keys
+    wget --tries=2 --retry-connrefused --waitretry=10 -qO- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --dearmor --yes --output /usr/share/keyrings/oracle-virtualbox.gpg
+    # Change the mod of the key
+    sudo chmod 644 /usr/share/keyrings/oracle-virtualbox.gpg
+    # Add the repository
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox.gpg] http://download.virtualbox.org/virtualbox/debian $(lsb_release -sc) contrib" | sudo tee /etc/apt/sources.list.d/virtualbox.list
+    # Change the mod of the key
+    sudo chmod 644 /etc/apt/sources.list.d/virtualbox.list
+    # Update repositories
+    if ! dpkg -l | grep -q virtualbox; then
+        apt update && apt install virtualbox-7.1 -y
+    fi
+    # Add user to vboxusers group
+    usermod -a -G vboxusers "$user_name"
+  #+end_src
+** Other software [Optional]
+The following programs can be grouped in a second category of optional software because they are either more specialized (/e.g./ Snapgene), their installation require downloading a binary package (=*.deb=) and/or there are plenty of other alternatives. 
+- *[[https://joplinapp.org/][Joplin]]*: An open-source note-taking app with support for Markdown and syncing across devices.
+    #+begin_src bash
+      # Switch to download directory
+      get_user_dir XDG_DOWNLOAD_DIR idownload
+      cd $idownload || exit
+      # Get deb package from gitlab: https://gitlab.com/LFd3v/joplin-desktop-linux-package/-/releases
+      joplin_url="https://gitlab.com/api/v4/projects/51036930/packages/generic/joplin-desktop-linux-package/3.1.24/joplin_3.1.24_amd64.deb"
+      if [ ! -f Joplin.deb ]; then
+          wget --tries=2 --retry-connrefused --waitretry=10 "$joplin_url" -O "$idownload"/Joplin.deb
+      fi
+      # Install
+      if ! dpkg -l | grep -q joplin; then
+          dpkg --force-confdef -i "$idownload"/Joplin.deb
+      fi
+    #+end_src
+- *[[https://github.com/johannesjo/super-productivity/releases][Super Productivity]]*: A task management app with time tracking and integration with popular project management tools.
+    #+begin_src bash
+      # Switch to download directory
+      get_user_dir XDG_DOWNLOAD_DIR idownload
+      cd "$idownload" || exit
+      if [ ! -f Super_productivity.deb ]; then
+          wget --tries=2 --retry-connrefused --waitretry=10 "$super_url" -O "$idownload"/Super_Productivity.deb
+      fi
+      # Install
+      if ! dpkg -l | grep -q superproductivity; then
+          dpkg --force-confdef -i "$idownload"/Super_Productivity.deb
+      fi
+    #+end_src
+- *[[https://www.snapgene.com/snapgene-viewer][SnapGene]]*: A molecular biology software for designing and visualizing DNA constructs. The free version (SnapGene viewer) requires to register an e-mail address in the following direction: https://www.snapgene.com/snapgene-viewer
+- *[[http://serialbasics.free.fr/Serial_Cloner-Download.html][Serial Cloner]]*: A cloning software for managing, designing, and analyzing DNA sequences.
+    #+begin_src bash
+      # Switch to download directory
+      get_user_dir XDG_DOWNLOAD_DIR idownload
+      local_bin="$HOME/.local/bin/"
+      cd "$idownload" || exit
+      if [ ! -f SerialCloner2-6.tar ]; then
+          wget --tries=2 --retry-connrefused --waitretry=10 "$serial_url"
+      fi
+      tar -xf SerialCloner2-6.tar -C "$local_bin"
+      # Add launcher
+      ilauncher="$HOME/.local/share/applications/serial_cloner.desktop"
+      touch "$ilauncher"
+      # sudo chmod 755 "$ilauncher"
+      echo -e "[Desktop Entry]
+            Name=Serial Cloner 2.6
+            Exec=~/.local/bin/SerialCloner2-6/SerialCloner2.6.1
+            Type=Application
+            Categories=Education;
+            Comment=Cloning software for managing, designing, and analyzing DNA sequences." | tee "$ilauncher"
+      sed -i 's/^[ \t]*//' "$ilauncher"
+    #+end_src
+- *[[https://github.com/calo001/fondo][Fondo]]*: A wallpaper manager for discovering and setting high-quality background images.
+  #+begin_src bash
+      flatpak install flathub com.github.calo001.fondo
+  #+end_src
+- *[[https://yazi-rs.github.io/][Yazi]]*: Terminal file manager written in Rust, based on async I/O [[[id:bb7c772a-b957-4dc1-90d4-9708cce71a29][Notes]]]
+#+begin_src bash
+  # Install dependencies
+  sudo apt install file ffmpegthumbnailer unar jq poppler-utils fd-find fzf zoxide ripgrep -y
+  # Install rust https://rustup.rs/
+  curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+  # Load Rust environment
+  source "$HOME/.cargo/env"
+  # Install Yazi from crates.io
+  cargo install --locked yazi-fm yazi-cli
+#+end_src

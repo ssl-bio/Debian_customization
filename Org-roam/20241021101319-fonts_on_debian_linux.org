@@ -1,0 +1,44 @@
+:PROPERTIES:
+:ID:       44c74583-b614-4e3f-b223-4e4845f3bf03
+:END:
+#+title: Fonts on Debian/Linux
+#+filetags: :fonts:linux:
+
+* Description
+The following note is for installing fonts on Debian/Linux
+
+* Local installation
+1. Copy fonts binaries to =~/.local/share/fonts=
+2. Update cache =fc-cache -f -v=
+   
+* System wide installation [Nerd Fonts Symbols]
+These are necessary to correctly show symbols in Emacs and Yazi. 
+  #+begin_src bash :dir "/sudo::"
+    nerd_url='https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/NerdFontsSymbolsOnly.tar.xz'
+    font_dir="/usr/share/fonts/truetype"
+    if [ ! -f NerdFontsSymbolsOnly.tar.xz ]; then
+        wget --tries=2 --retry-connrefused --waitretry=10 "$nerd_url"
+    fi
+    mkdir SymbolsNerdFont
+    tar -xf NerdFontsSymbolsOnly.tar.xz -C "SymbolsNerdFont"
+    sudo mv SymbolsNerdFont "$font_dir"
+
+    # Rebuild font cache
+    fc-cache -f -v
+  #+end_src
+
+* Shared folders
+:shared-folders:
+#+begin_src bash
+  font_dir=/media/discs/shared/local/fonts
+
+  rm -rf ~/.local/share/fonts
+  ln -s  ${font_dir} ~/.local/share/fonts
+#+end_src
+:END:
+
+* Back-links
+[[[id:ca223956-34a0-457f-91f4-13fb213db673][Debian customization]]]
+
+* Web links
+- [[https://medium.com/source-words/how-to-manually-install-update-and-uninstall-fonts-on-linux-a8d09a3853b0][Manual installation]]

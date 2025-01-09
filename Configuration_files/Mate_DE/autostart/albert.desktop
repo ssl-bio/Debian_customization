@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Exec=albert
+Hidden=false
+Name[es_BO]=Albert
+Name=Albert
+Comment[es_BO]=Lanzador de aplicaciones
+Comment=Lanzador de aplicaciones
+X-MATE-Autostart-Delay=0

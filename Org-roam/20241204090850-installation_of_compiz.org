@@ -1,0 +1,52 @@
+:PROPERTIES:
+:ID:       7bc647cc-bf19-4cd3-8473-899a45480551
+:END:
+#+title: Installation of compiz
+#+filetags:  :compiz:
+
+* Description
+Compiz is a compositing window manager for X11 that provides advanced graphical effects and features. The customizations included in the configuration file are mainly for:
+- Enabling /hot-corners/ for showing workspaces (/Expo plugin/ > /Expo edge/) and windows (/Scale/ plugin > /Widow picker/).
+- Enabling the enhanced zoom desktop (mapped to the super key (Windows-Key) and the mouse-wheel)
+- Configuring the positioning of windows (/Put/ plugin) with custom key combinations.
+#+begin_src bash
+sudo apt install compiz-core compiz-gnome compiz-mate compiz-plugins compiz-plugins-main compizconfig-settings-manager gir1.2-rsvg-2.0 libcompizconfig0 libdecoration0 libprotobuf32 mesa-utils mesa-utils-bin python3-compizconfig
+#+end_src
+
+* Keybindings
+#+caption: *Keybindings for positioning windows with Compiz*. All of these are combinations of the =Super= key ('Windows-key') and a letter.
+ #+label: tab:compiz-keybindings
+ #+name: tab:compiz-keybindings
+ | Keybinding  | Function       |
+ |-------------+----------------|
+ | =Super + K= | move-to-center |
+ | =Super + M= | bottom-left    |
+ | =Super + ,= | bottom         |
+ | =Super + .= | bottom-right   |
+ | =Super + J= | left           |
+ | =Super + L= | right          |
+ | =Super + U= | top-left       |
+ | =Super + I= | top            |
+ | =Super + O= | top-right      |
+ |-------------+----------------|
+* Backup and restore
+ #+begin_src bash
+    # Directory with customization files
+    custom_dir=~/debian_customization
+    # Backup profile
+    backup_file="${custom_dir}"/compiz/compiz_bookworm_default.profile
+    if [ ! "$backup_file" ]; then
+        dconf dump /org/compiz/ > "$backup_file"
+    fi
+
+    # Replace profile with custom one
+    dconf load /org/compiz/ < "${custom_dir}"/compiz/compiz_bookworm_custom.profile.
+
+    # Load Compiz
+    compiz --replace &
+  #+end_src
+  
+For some reason the commands above do not seem to load the custom settings however, this can be done from within the program (=CompizConfig Settings Manager=) by going to /Preferences/ > /Import/ and selecting the file with the customizations (=~/debian_customization/compiz/compiz_bookworm_custom.profile=)
+
+* Back-links
+[[[id:ca223956-34a0-457f-91f4-13fb213db673][Debian customization]]] [[[id:c3cf1e06-fdb1-42a8-bebd-cddae74dd1b6][List of applications]]]

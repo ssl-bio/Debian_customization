@@ -1,0 +1,56 @@
+:PROPERTIES:
+:ID:       bb7c772a-b957-4dc1-90d4-9708cce71a29
+:END:
+#+title: Installation and usage of Yazi cli file manager
+#+filetags: :yazi:terminal:file-manager:
+
+* Installation
+The following commands will install Yazi (https://yazi-rs.github.io/) using cargo (rust).
+
+#+begin_src bash
+  # Install dependencies
+  sudo apt install file ffmpegthumbnailer unar jq poppler-utils fd-find fzf zoxide ripgrep
+
+  # Install rust https://rustup.rs/
+  curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
+
+  # Install Yazi from crates.io
+  cargo install --locked yazi-fm yazi-cli
+
+  # Uninstall
+  # cargo uninstall yazi-fm yazi-cli
+#+end_src
+* Some keyboard functions
+#+caption: Yazi keyboard functions
+#+label: tab:keyboard
+#+name: tab:keyboard
+| Key | Function                        | Notes                      |
+|-----+---------------------------------+----------------------------|
+| F1  | Show functions                  |                            |
+| j   | Move down on panel              |                            |
+| k   | Move up on panel                |                            |
+| h   | Move to parent folder           |                            |
+| l   | Move into folder                |                            |
+| x   | Cut                             |                            |
+| X   | Undo Cut                        |                            |
+| y   | Copy (Yank)                     |                            |
+| Y   | Undu Yank                       |                            |
+| p   | Paste                           |                            |
+| c   | Copy path                       | Select what to copy        |
+| d   | Move to trash-bin               | Confirmation required      |
+| D   | Permanently delete              | Confirmation required      |
+| a   | New file/directory              | Append '/' for directories |
+| TAB | Show file/directory information |                            |
+| .   | Toggle show hidden files        |                            |
+| ,   | Sort files                      | Choose sorting criteria    |
+| m   | Show info on panel              | Choose info to show        |
+| f   | Filter files                    | Type string. Fuzzy match   |
+| s   | Search filename                 | Uses fd                    |
+| S   | Search within files             | Uses ripgrep               |
+| g   | Go to specific directories      | Choose location            |
+| t   | Create new tab                  |                            |
+| [   | Move to left-tab                |                            |
+| ]   | Move to right-tab               |                            |
+| C-c | Close tab                       |                            |
+* Back-links
+[[[id:ca223956-34a0-457f-91f4-13fb213db673][Debian customization]]] [[[id:c3cf1e06-fdb1-42a8-bebd-cddae74dd1b6][List of applications]]]

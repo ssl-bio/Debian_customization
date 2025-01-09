@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Exec=plank
+Hidden=false
+Name[es_BO]=Plank
+Name=Plank
+Comment[es_BO]=Puerto de aplicaciones
+Comment=Puerto de aplicaciones
+X-MATE-Autostart-Delay=0

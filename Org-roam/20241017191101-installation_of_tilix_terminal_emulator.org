@@ -1,0 +1,97 @@
+:PROPERTIES:
+:ID:       b4594a5a-f1ab-4eea-b12e-f8c1d6bf19d9
+:END:
+#+title: Configuration of Tilix terminal emulator
+#+filetags: :terminal:
+
+* Description
+The following are commands to install/configure Tilix terminal emulator on Debian
+
+* Configuration
+#+begin_src bash :results silent
+  echo -e "#Tilix configuration
+  if [ \$TILIX_ID ] || [ \$VTE_VERSION ]; then
+     source /etc/profile.d/vte.sh
+  fi" >>  #~/.bashrc
+  # Create symlink
+  ln -s /etc/profile.d/vte-2.91.sh /etc/profile.d/vte.sh
+#+end_src
+
+* Backup configuration
+#+begin_src bash :results silent
+  iroot=/media/discs/shared/configuration/tilix
+  dconf dump /com/gexperts/Tilix/keybindings/ > "$iroot"/tilix_keybindings
+
+  # Profiles
+  dconf dump /com/gexperts/Tilix/profiles/ > "$iroot"/tilix_profiles
+#+end_src
+** Keybindings
+Some of the functions affected are described on table [[tab:tilix-keybindings]]. The full configuration, =tilix_keybindings=, is a plain-text file that can be easily inspected.
+#+caption: Some keybindings re/defined in the custom configuration, =tilix_keybindings=.
+ #+label: tab:tilix-keybindings
+ #+name: tab:tilix-keybindings
+ | Keybinding        | Function                               |
+ |-------------------+----------------------------------------|
+ | =Ctrl-w=          | Cut                                    |
+ | =Alt-w=           | Copy                                   |
+ | =Ctrl-y=          | Paste                                  |
+ | =Win-t=           | New session (tab)                      |
+ | =Win-n=           | New window                             |
+ | =Ctrl-Win-x=      | Split window down (Add session down)   |
+ | =Ctr-Win-d=       | Split window right (Add session right) |
+ | =Alt-Left/Right=  | Resize terminal horizontally           |
+ | =Alt-Up/Down=     | Resize terminal vertically             |
+ | =Win-Left/Right=  | Switch terminal horizontally           |
+ | =Win-Up/Down=     | Switch terminal vertically             |
+ | =Shift-Up/Down=   | Scroll terminal                        |
+ | =Win-[0-9]=       | Switch to session [0-9]                |
+ | =Ctrl-Win-[hjkl]= | Switch to one of the custom Profiles   |
+ |-------------------+----------------------------------------|
+** Restore keybindings
+#+begin_src bash
+  # backup_dir=/media/discs/shared/configuration/tilix
+  backup_dir=/media/discos/saul/saul/configuration/tilix
+  # Keybidings
+  dconf load /com/gexperts/Tilix/keybindings/ < ${backup_dir}/tilix_keybindings
+
+  # Profiles
+  dconf load /com/gexperts/Tilix/profiles/ < ${backup_dir}/tilix_profiles
+#+end_src
+* Themes
+- Color schemes are stored in ~/usr/share/tilix/schemes~
+- [[https://github.com/storm119/Tilix-Themes/blob/master/Themes.md][Online themes]]
+  list of themes
+  | D/L | Theme         | url                  |        |
+  |-----+---------------+----------------------+--------|
+  | L   | Github        | https://git.io/v7QaC |        |
+  | D   | Sea shells    | https://git.io/v7Qay |        |
+  | L   | Man page      | https://git.io/v7QVU |        |
+  |     | Red sands     | https://git.io/v7QVf |        |
+  |     | Adventure     | https://git.io/v7QVg |        |
+  | D   | Borland       | https://git.io/v7Q2Q | purple |
+  | D   | C64           | https://git.io/v7Q2p | purple |
+  | L   | Tomorrow      | https://git.io/v7QVy |        |
+  |     | lc orange ppl | https://git.io/v7Qa0 |        |
+  |     | lc green ppl  | https://git.io/v7QaR |        |
+  |     | pencil light  | https://git.io/v7QVJ |        |
+
+  #+begin_src bash : results silent :dir /sudo::
+    idest="/usr/share/tilix/schemes"
+    ijson="pencil-light.json"
+    ihtml="https://git.io/v7QVJ"
+    sudo wget -O $idest/$ijson $ihtml 
+    sudo chmod 644 $idest/$ijson
+  #+end_src 
+:END:
+
+* Symlinks
+:symlinks:
+#+begin_src bash :dir /sudo::
+  sudo mv /usr/share/tilix/schemes /usr/share/tilix/schemes_bak
+  sudo ln -s /media/discs/shared/configuration/tilix/schemes /usr/share/tilix/schemes 
+#+end_src
+
+:END:
+
+* Back-links
+[[[id:ca223956-34a0-457f-91f4-13fb213db673][Debian customization]]] [[[id:c3cf1e06-fdb1-42a8-bebd-cddae74dd1b6][List of applications]]]

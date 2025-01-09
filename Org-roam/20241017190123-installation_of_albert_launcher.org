@@ -1,0 +1,49 @@
+:PROPERTIES:
+:ID:       c3ba7bf5-60da-4c85-a813-2334efad5e15
+:END:
+#+title: Installation of Albert launcher
+#+filetags: :launcher:
+
+* Description
+The following are commands to install albert launcher on Debian. Albert is a plugin-based keyboard launcher. The commands below will add its repository (from opensuse), install it and overwrite the configuration. The latter includes assigning the key combination =Meta+space= to launch it (where =Meta= is the Windows-key).
+* Sources
+** Testing
+#+begin_src bash
+  echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/Debian_Testing/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
+  curl -fsSL https://download.opensuse.org/repositories/home:manuelschneid3r/Debian_Testing/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_manuelschneid3r.gpg > /dev/null
+#+end_src
+** Stable
+#+begin_src bash
+echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/Debian_12/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
+curl -fsSL https://download.opensuse.org/repositories/home:manuelschneid3r/Debian_12/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_manuelschneid3r.gpg > /dev/null
+#+end_src
+* Installation
+#+begin_src bash :dir "/sudo::"
+  if ! dpkg -l | grep -q albert; then
+      # Add repository
+      echo 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/Debian_12/ /' | sudo tee /etc/apt/sources.list.d/home:manuelschneid3r.list
+      curl -fsSL https://download.opensuse.org/repositories/home:manuelschneid3r/Debian_12/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_manuelschneid3r.gpg > /dev/null
+
+      # Update and install Albert
+      sudo apt update && sudo apt install albert -y
+  fi
+  # Start albert
+  albert &
+  #+end_src
+
+* Backup and customization
+#+begin_src bash
+  custom_dir="~/debian_customization"
+  # Backup configuration and replace with custom one
+      if [  -f ~/.config/albert.conf ] && [ ! -f ~/.config/albert.conf.bak ]; then
+          cp ~/.config/albert.conf ~/.config/albert.conf.bak
+      fi
+
+  cp "${custom_dir}"/albert/albert.conf ~/.config/albert.conf
+#+end_src
+
+* Back-links
+[[[id:ca223956-34a0-457f-91f4-13fb213db673][Debian customization]]]  [[[id:c3cf1e06-fdb1-42a8-bebd-cddae74dd1b6][List of applications]]]
+
+* Web links
+-  [[https://software.opensuse.org/download.html?project=home:manuelschneid3r&package=albert][Official instructions]]

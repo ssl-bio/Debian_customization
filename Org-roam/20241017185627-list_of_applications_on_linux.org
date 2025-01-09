@@ -1,0 +1,94 @@
+:PROPERTIES:
+:ID:       c3cf1e06-fdb1-42a8-bebd-cddae74dd1b6
+:END:
+#+title: List of applications on Linux Debian
+#+filetags: :applications:linux:
+
+* Description
+The following is a list of some applications installed on my system
+
+* Installation that requires configuration
+- *[[id:273d09b7-0768-43d5-a6f8-ed1d6dc4331a][Java]]*: A versatile, platform-independent programming language and computing platform for developing and running applications.
+- *[[id:b65fd43e-ed06-4428-ae30-3c67a2c4f4ed][OnlyOffice]]*: A collaborative office suite supporting document, sprzoereadsheet, and presentation editing.
+- *[[id:b36b261a-b566-4006-b967-f01fb73aee58][Tor]]*: A privacy-focused browser that anonymizes internet activity by routing traffic through a global volunteer network.
+- *[[id:d66a0e5e-6818-4af8-bcf9-4bb1d420c483][Fondo]]*: A wallpaper manager for discovering and setting high-quality background images.
+- *[[id:e4f8cd3b-3018-4819-a2d1-025dff28f599][Hugo]]*: A fast, open-source static site generator for building websites using Markdown and templates.
+- *[[id:c3ba7bf5-60da-4c85-a813-2334efad5e15][Albert]]*: A customizable launcher and productivity tool for quickly accessing files, aUYpps, and web searches.
+- *[[id:b6346e34-d2ae-46f6-b4c9-9facb05e1990][Quicktile]]*: A window manager for quickly arranging windows into tiling layouts on Linux.
+- *[[id:5aca015f-ea56-4a89-90da-e6924b04b7fc][Zotero]]*: A research and citation management tool for collecting, organizing, and citing references.
+- *[[id:5d37e04d-af50-4071-ad25-477efe49efee][Tex distribution]]*: A comprehensive set of tools and packages for typesetting documents, commonly used for academic publishing.
+- *[[id:e4c9f06e-7b48-4778-bae2-c63506922f5d][Rclone]]*: A command-line tool for managing files on cloud storage and other remote file systems.
+- *[[id:2a227b6d-8a74-450c-a7ff-ce792fe9d4a9][R]]*: A programming language and software environment for statistical analysis and data visualization.
+- *[[id:dc9b6b1d-6c03-4586-a616-d39f501c2532][Joplin]]*: An open-source note-taking app with support for Markdown and syncing across devices.
+- *[[id:72b810c5-c9e8-449c-b1ca-a8f730167230][Virtualbox]]*: An open-source hypervisor for running virtual machines across various operating systems.
+- *Zoom*: A video conferencing platform for online meetings, webinars, and team collaboration.
+- *Firefox*: Firefox is a secure, open-source web browser.
+- *[[id:8367b517-351a-4f2c-8f32-16c7319c6e0e][Emacs]]*: An extensible, customizable text editor, often used for coding, writing, and task management.
+- *[[id:eb5cf720-9348-421b-b8a8-1929249ec3a8][Brave]]*: A privacy-focused web browser with ad-blocking and cryptocurrency integration.
+- *[[id:2c08d55d-98d6-472c-b9c0-be27645602e4][Macchanger]]*: A command-line tool for changing the MAC address of network interfaces.
+- *[[id:08309ec4-27a8-4894-bee5-64cfee9595e2][Markmap-Cli]]*: A tool for converting Markdown files into interactive mind maps.
+- *[[https://www.yworks.com/products/yed/download%23download][yED]]*: A diagramming tool for creating flowcharts, network diagrams, and other visualizations.
+- *[[https://www.snapgene.com/snapgene-viewer][SnapGene]]*: A molecular biology software for designing and visualizing DNA constructs.
+- *[[http://serialbasics.free.fr/Serial_Cloner-Download.html][Serial Cloner]]*: A cloning software for managing, designing, and analyzing DNA sequences.
+- *[[https://github.com/johannesjo/super-productivity/releases][Super Productivity]]*: A task management app with time tracking and integration with popular project management tools.
+- *[[id:0b8d77d5-8ce7-4293-8476-2a13cee5cc23][Anaconda]]*: A distribution for Python and R programming, especially for data science, with package management and environment support.
+- *Compiz*: The Compiz window manager
+- *Spotify*: Digital music streaming platform
+* Installation without configuration
+These can be [[id:8ea60ae5-3961-4d58-87a4-e34a9f47e71b][installed from the command line]] with a single command
+- *ClamTk*: A graphical front end for ClamAV, providing a user-friendly interface for antivirus scanning.
+- *ExifTool*: A command-line tool for reading, writing, and editing metadata in image, audio, and video files. Also works for pdf files [[[id:d8df1794-d633-422a-9b24-e7c844a12b4b][Tag a file]]].
+- *GIMP*: An open-source image editor for photo retouching, composition, and graphic design.
+- *Ripgrep*: A fast, command-line search tool for recursively searching directories for regex patterns.
+- *[[id:15bcc8b3-3ae8-4afa-a3ab-db916f18fd8b][Thunderbird]]*: A customizable, open-source email client with features like calendaring and chat integration.
+- *[[id:5bf03dee-6c73-4638-899b-c6305d063aa6][Clamav]]*: An open-source antivirus engine for detecting malware and viruses.
+- *[[id:b4594a5a-f1ab-4eea-b12e-f8c1d6bf19d9][Tilix]]*: A tiling terminal emulator with support for split views and custom layouts.
+- *[[id:c3e691fa-4ab9-4548-b8a0-d16343559317][Redshift]]*: A screen color adjustment tool that reduces blue light based on time of day to reduce eye strain.
+- *[[id:ef39e7c4-11b4-425c-addb-7fa1b36ba865][Cheat]]*: A command-line tool for displaying simple, community-contributed cheat sheets for common commands.
+- *Audacity*: A popular, open-source audio editor and recorder with extensive editing tools.
+- *Calibre*: An e-book management software that lets you organize, edit, and convert e-books.
+- *CueTools / Shntool*: Audio processing utilities for handling, splitting, and manipulating audio files, especially CUE sheets.
+- *Git*: A distributed version control system for tracking changes in source code during software development.
+- *GoldenDict*: A dictionary and translation application that supports multiple dictionary formats.
+- *Gnumeric*: Free and open-source spreadsheet program with Excel-compatible features.
+- *htop*: An interactive process viewer for monitoring system processes and resource usage.
+- *Inkscape*: A vector graphics editor for creating and editing scalable vector images.
+- *KeePassXC*: An open-source password manager for storing and organizing passwords securely.
+- *Meld*: A visual diff and merge tool for comparing files, directories, and version control branches.
+- *mp3splt*: A command-line tool for splitting MP3 and Ogg Vorbis files without re-encoding.
+- *PDFtk*: A tool for merging, splitting, and editing PDF files.
+- *Puddletag*: An audio file tag editor with a spreadsheet-like interface for bulk editing metadata.
+- *rsync*: A command-line utility for syncing and transferring files across systems.
+- *Sayonara*: A lightweight music player with a straightforward interface and playlist support.
+- *Seahorse*: A GUI for managing GPG and SSH keys and encryption passwords.
+- *Tesseract-OCR*: An optical character recognition (OCR) engine for extracting text from images.
+- *Transmission*: A lightweight, open-source BitTorrent client.
+- *VLC*: A free, open-source media player capable of playing most multimedia files and streaming.
+- *[[id:bb7c772a-b957-4dc1-90d4-9708cce71a29][Yazi]]*: Terminal file manager written in Rust, based on async I/O
+- *Curl*: A command-line tool used to transfer data to or from a server using various network protocols such as HTTP, HTTPS, FTP, and more.
+** Mate DE related
+- mate-dock-applet
+- caja-open-terminal
+- mozo
+
+
+* Installation from the command line
+#+begin_src bash
+   # Packages that Typically Come Pre-Installed on Debian and MATE Desktop
+   # adduser alsa-utils apt apt-utils base-files base-passwd bash bsdutils busybox bzip2 ca-certificates coreutils cpio cron curl dash dbus debconf debian-archive-keyring debianutils dpkg e2fsprogs fdisk findutils gnupg-agent grep gzip hostname ifupdown iproute2 iputils-ping less locales login lsb-base mawk mount ncurses-base ncurses-bin netbase passwd perl procps sed sensible-utils systemd tar tzdata udev util-linux vim-tiny wget whiptail xz-utils
+
+   # Packages Specifically Included in the MATE Desktop Environment
+   sudo apt install atril blueman caja-open-terminal console-setup dconf-cli dconf-editor libglib-object-introspection-perl mate-desktop-environment-extra mate-dock-applet mate-tweak mozo network-manager-gnome
+
+   # Development and Utility Libraries/Tools
+  sudo apt install autoconf automake cmake debhelper default-jre diffutils doc-debian gcc gettext-base libgpg-error libpam libssl libudev pkg-config python3 ripgrep zstd libsystemd-dev tasksel
+  
+   # Main Applications
+   sudo apt install albert audacity bat bind9-dnsutils chromium clamav calibre cheat cuetools emacs ffmpeg git git-lfs gimp gnome-themes-extra gnumeric goldendict graphviz htop hugo inkscape keepassxc libimage-exiftool-perl libreoffice macchanger meld obs-studio openshot-qt pandoc pdftk puddletag plank redshift rclone ripgrep rsync sayonara seahorse synaptic tesseract-ocr texinfo thunderbird tilix transmission vim vlc xterm
+#+end_src
+
+* Old applications
+- [[id:8094a811-34e3-484c-bb72-635ebf6e58d8][Guayadeque]]
+
+* Back-links
+[[[id:609e2199-b463-432d-80f9-94a865bff16e][Debian intro]]] [Linux]

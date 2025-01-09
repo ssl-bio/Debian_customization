@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Exec=compiz --replace
+Hidden=false
+Name[es_BO]=Compiz
+Name=Compiz
+Comment[es_BO]=Gestor de ventanas
+Comment=Gestor de ventanas
+X-MATE-Autostart-Delay=0

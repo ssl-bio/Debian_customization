@@ -1,0 +1,72 @@
+:PROPERTIES:
+:ID:       b6346e34-d2ae-46f6-b4c9-9facb05e1990
+:END:
+#+title: Configuration of Quicktile tiling program
+#+filetags: :tiling:
+
+
+* Description
+The following are commands to install Quicktile tiling program on [[id:c3cf1e06-fdb1-42a8-bebd-cddae74dd1b6][Debian]]
+[[https://github.com/ssokolow/quicktile][GitHub]] | [[http://ssokolow.com/quicktile/index.html][Home]]
+
+* Installation
+#+begin_src bash
+    # Dependencies
+    sudo apt install python3 python3-pip python3-setuptools python3-gi python3-xlib python3-dbus gir1.2-glib-2.0 gir1.2-gtk-3.0 gir1.2-wnck-3.0 -y
+    # Move to the cloned folder
+    ./install-sh
+  #+end_src
+** Setup
+- Run quicktile or ./quicktile.sh once to generate your configuration file at ~/.config/quicktile.cfg
+- Edit the keybindings as desired.
+- Run =quicktile --daemonize= or =./quicktile.sh --daemonize= to bind to global hotkeys.
+- If everything seems to be working, add =quicktile --daemonize= or =/full/path/to/quicktile.sh --daemonize= to the list of commands your desktop will run on login.
+
+** Configuration
+The letters were selected to, more or less, resemble the position where the window will be arranged when used the key combination (Figure  [[fig:keyboard1]]), for example =Mod4+Q= will resize the window to the top-left corner whereas, =Mod4+D= will resize the window to the right side of the screen. By default Quicktile is configured to have 3 sizes of windows based on the horizontal space, 1/2, 1/3 and 2/3. These can be cycled by pressing the same key combination repeatedly.
+#+caption: *Keybindings for re-sizing windows with Quicktile*. All of these are combinations of the =Mod4= key ('Windows-key') and a letter.
+ #+label: tab:quicktile-keybindings
+ #+name: tab:quicktile-keybindings
+ | Keybinding | Function            |
+ |------------+---------------------|
+ | =Mod4 + F= | move-to-center      |
+ | =Mod4 + R= | horizontal-maximize |
+ | =Mod4 + V= | vertical-maximize   |
+ | =Mod4 + S= | maximize            |
+ | =Mod4 + Z= | bottom-left         |
+ | =Mod4 + X= | bottom              |
+ | =Mod4 + C= | bottom-right        |
+ | =Mod4 + A= | left                |
+ | =Mod4 + D= | right               |
+ | =Mod4 + Q= | top-left            |
+ | =Mod4 + W= | top                 |
+ | =Mod4 + E= | top-right           |
+ |------------+---------------------|
+
+Make sure to check if these combinations conflict with others defined previously, for example, if Compiz is not used {{{tag(kbd,Super)}}} + {{{tag(kbd,E)}}} or  {{{tag(kbd,Super)}}} + {{{tag(kbd,S)}}} are associated with the launching the file manager and the search function, respectively.
+
+*** Symlink to configuration file
+#+begin_src bash
+  shared-dir="/media/discos/saul/shared"
+  ln -s ${shared-dir}/configuration/Others/quicktile.cfg ~/.config/quicktile.cfg
+#+end_src
+*** Modifications
+- =Mod4 G=: move to center
+* Uninstall
+#+begin_src bash
+  # find where it has been installed
+  find /usr/local/lib -iname 'quicktile*'
+
+  # Remove files
+  # Remove the command that can be typed at the command-line
+  sudo rm /usr/local/bin/quicktile
+
+  # Remove the autostart file
+  sudo rm /etc/xdg/autostart/quicktile.desktop
+
+  # Remove the launcher menu entry
+  sudo rm /usr/local/share/applications/quicktile.desktop
+#+end_src
+
+* Back-links
+[[[id:ca223956-34a0-457f-91f4-13fb213db673][Debian customization]]]

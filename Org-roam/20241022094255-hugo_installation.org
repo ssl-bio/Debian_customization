@@ -1,0 +1,33 @@
+:PROPERTIES:
+:ID:       e4f8cd3b-3018-4819-a2d1-025dff28f599
+:END:
+#+title: Hugo installation
+#+filetags: :blog:web-devel:
+
+* Description
+The following notes would help installing the static site generator (SSG) Hugo on Debian along with one of the themes I used to write my blog
+Check the [[https://github.com/gohugoio/hugo/releases][Releases page]] to obtain the latest version.
+#+begin_src bash :dir "/sudo::"
+    # Check https://github.com/gohugoio/hugo/releases/latest for the latest release
+    hugo_url="https://github.com/gohugoio/hugo/releases/download/v0.140.0/hugo_extended_0.140.0_linux-amd64.deb"
+    cd "$idownload" || exit
+    if [ ! -f hugo.deb ];then
+        wget --tries=2 --retry-connrefused --waitretry=10 "${hugo_url}" -O hugo.deb    
+    fi
+    # Install 
+    if ! dpkg -l | grep -q hugo; then
+        sudo dpkg -i hugo.deb
+    fi
+  #+end_src
+* Toha
+Toha is a theme for Hugo.
+[[[https://github.com/hugo-toha/toha][GitHub]]] [[[https://hugo-toha.github.io/][Demo: John's Blog]]]
+#+begin_src bash
+  # go
+  sudo apt install -t bookworm-backports golang-go
+
+  # node
+#+end_src
+
+* Back-links
+[[[id:c3cf1e06-fdb1-42a8-bebd-cddae74dd1b6][List of applications]]]

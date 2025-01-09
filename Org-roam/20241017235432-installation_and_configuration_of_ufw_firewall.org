@@ -1,0 +1,85 @@
+:PROPERTIES:
+:ID:       34941011-eb5b-47d3-8e4c-989aab83dc59
+:END:
+#+title: Installation and configuration of ufw firewall
+#+filetags: :firewall:ports:
+
+Configuration of ufw (uncomplicated firewall) on Debian.
+
+* List of ports
+List of ports to block from [[https://support.huawei.com/enterprise/en/doc/EDOC1100297670][Huawei]]
+#+caption: Remote management services
+#+label: tab:remote-services
+#+name: tab:remote-services
+|                     Port | Protocol    | Service                               | Recommended Action                                                                  |
+|--------------------------+-------------+---------------------------------------+-------------------------------------------------------------------------------------|
+|                20 and 21 | TCP         | FTP                                   | Disable always. Use SSHv2 or deploy the O&M audit system.                           |
+|                       22 | TCP         | SSH                                   | Disable recommended. If the port must be used, use SSHv2 and strong authentication. |
+|                       23 | TCP         | Telnet                                | Disable always. Use SSHv2 or deploy the O&M audit system.                           |
+|                       69 | TCP         | TFTP                                  | Disable always. Use SSHv2 or deploy the O&M audit system.                           |
+|                     3389 | TCP         | RDP                                   | Disable always. If remote O&M is required, deploy the O&M audit system.             |
+|                5900–5902 | TCP         | VNC                                   | Disable always. If remote O&M is required, deploy the O&M audit system.             |
+|                  512-514 | TCP         | Linux rexec (remote login)            | Disable always. If remote O&M is required, deploy the O&M audit system.             |
+|                      873 | TCP         | Rsync (data mirror backup tool)       | Disable always. If remote O&M is required, deploy the O&M audit system.             |
+
+#+caption: LAN services
+#+label: tab:lan-services
+#+name: tab:lan-services
+|                     Port | Protocol    | Service                               | Recommended Action                                                                  |
+|--------------------------+-------------+---------------------------------------+-------------------------------------------------------------------------------------|
+|                       53 | TCP and UDP | DNS                                   | Disable always.                                                                     |
+|             111 and 2049 | TCP         | Network File System                   | Disable always.                                                                     |
+|                      135 | TCP and UDP | RPC                                   | Disable always.                                                                     |
+|                      137 | TCP and UDP | NetBIOS                               | Disable always.                                                                     |
+|                      138 | TCP and UDP | NBDS                                  | Disable always.                                                                     |
+|                      139 | TCP and UDP | NBSS                                  | Disable always.                                                                     |
+|                      445 | TCP and UDP | SMB                                   | Disable always.                                                                     |
+|                      161 | TCP and UDP | SNMP                                  | Disable always.                                                                     |
+|                      389 | TCP and UDP | LDAP                                  | Disable always.                                                                     |
+
+
+#+caption: Internet services 
+#+label: tab:internet-services
+#+name: tab:internet-services
+|                     Port | Protocol    | Service                               | Recommended Action                                                                  |
+|--------------------------+-------------+---------------------------------------+-------------------------------------------------------------------------------------|
+|                       25 | TCP         | SMTP                                  | Disable always. Use SMTPS instead.                                                  |
+|                      110 | TCP         | Post Office Protocol Version 3 (POP3) | Disable always. Use POP3S instead.                                                  |
+|                      143 | TCP         | IMAP                                  | Disable always. Use IMAPS instead.                                                  |
+| 80, 8000, 8080, and 8888 | TCP         | HTTP                                  | Disable recommended. Use HTTPS instead.                                             |
+
+#+caption: Database
+#+label: tab:database
+#+name: tab:database
+|        Port | Protocol | Service                                 | Recommended Action |
+|-------------+----------+-----------------------------------------+--------------------|
+|        1433 | TCP      | SQL Server (database management system) | Disable always.    |
+|        1521 | TCP      | Oracle (Oracle database)                | Disable always.    |
+|        3306 | TCP      | MySQL (database)                        | Disable always.    |
+|        5000 | TCP      | Sybase/DB2 (database)                   | Disable always.    |
+|        5432 | TCP      | PostgreSQL (database)                   | Disable always.    |
+|        6379 | TCP      | Redis (database)                        | Disable always.    |
+| 27017-27018 | TCP      | MongoDB (database)                      | Disable always.    |
+
+
+* Selected ports for blocking
+#+begin_src bash :dir "/sudo::" :results silent
+  blocked_ports=("53" "135" "137:139" "161" "389" "445")
+  protocols=("udp" "tcp")
+  for iport in "${blocked_ports[@]}"; do
+      for iproto in "${protocols[@]}"; do
+  	sudo ufw deny proto $iproto to any port $iport
+      done
+  done
+#+end_src
+
+#+begin_src bash :dir "/sudo::" :results silent
+  blocked_ports=("20" "21" "22" "23" "25" "69" "3389" "5900:5902" "512:514" "873" "111" "2049" "110" "143" "80" "8000" "8080" "8888" "1433" "1521" "3306" "5000" "5432" "6379" "27017:27018")
+  for iport in "${blocked_ports[@]}"; do
+      sudo ufw deny proto tcp to any port $iport
+  done
+#+end_src
+
+* Backlinks
+[[[id:ca223956-34a0-457f-91f4-13fb213db673][Debian customization]]]
+

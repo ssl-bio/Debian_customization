@@ -1,0 +1,171 @@
+:PROPERTIES:
+:ID:       5d37e04d-af50-4071-ad25-477efe49efee
+:END:
+#+title: Installation and configuration of a TeX distribution
+#+filetags: :tex:texlive:latex:
+
+The following are instructions to install and configure a TeX distribution on Debian and Windows
+* Before upgrading/replacing
+** Getting a list of installed packages from an existing installation
+#+begin_src bash :results silent :dir /sudo::
+  sudo tlmgr list --only-installed | awk -F: '{print $1}' | awk '{print $2}' | egrep -v "win32|linux|cygwin|wintools" | tr '\n' ' ' > $idesk/installed-packages
+#+end_src
+*** Install packages
+#+begin_src bash :results silent
+  texcd=texlive22
+  folder=~/Desktop/$texcd
+  sudo tlmgr -repository $texcd install $(<installed-packages)
+#+end_src
+** Remove previously installed versions
+#+begin_src bash :results silent :dir /sudo::
+  rm /usr/local/texlive
+#+end_src
+* Installation 
+** Installation using a web installer
+#+begin_src bash
+  # Install dependencies
+  sudo apt install perl-tk tk tex-common texinfo lmodern -y
+
+  # Download installer
+  if [ ! -f install-tl-unx.tar.gz ]; then
+      wget --tries=2 --retry-connrefused --waitretry=10 $texlive_url -O install-tl-unx.tar.gz
+  fi
+  mkdir temp_dir
+  tar -xvzf install-tl-unx.tar.gz -C temp_dir
+  mv temp_dir/install-tl-* texlive_installer
+  rm -rf temp_dir
+  cd texlive_installer || exit
+
+  # Manual installation
+  sudo perl ./install-tl -gui
+#+end_src
+
+** Installation using an ISO file
+*** Mounting the ISO file
+#+begin_src bash :results silent :dir /sudo::
+  texcd=texlive24
+  folder=~/Escritorio/$texcd
+  mkdir $folder
+  sudo mount -o loop texlive*.iso $folder
+
+  cd $folder || exit
+
+  # Manual installation
+  sudo perl ./install-tl -gui
+#+end_src
+
+* Setup Font system
+#+begin_src bash :results silent :dir /sudo::
+  sudo rm /etc/fonts/conf.d/09-texlive.conf
+  sudo ln -s /usr/local/texlive/2024/texmf-var/fonts/conf/texlive-fontconfig.conf /etc/fonts/conf.d/09-texlive.conf
+  sudo fc-cache -fsv
+#+end_src
+
+* Temporarily setup a different mirror
+List of mirrors: https://ctan.org/mirrors
+#+begin_src bash
+  # Example
+  export TEXLIVE_REPOSITORY="https://ctan.dcc.uchile.cl/"
+#+end_src
+* Integrate with Debian
+1) Install vanilla TeX Live as root, system-wide.
+2) Ensure that the only Debian TeX Live packages installed are
+   #+begin_src bash
+  sudo apt install tex-common texinfo lmodern
+     #+end_src
+     
+3) Add TeX Live's bin directory to =ENV_PATH= in =/etc/login.defs.=
+4) Tell APT about your TeX Live installation by building a dummy package using equivs:
+5) Create the folder =/tmp/tl-equivs= and the file =texlive-local= inside it
+   #+begin_src bash
+     mkdir /tmp/tl-equivs
+     cd /tmp/tl-equivs
+     equivs-control texlive-local
+   #+end_src
+6) Edit the file with the following information
+     #+begin_src
+Section: misc
+Priority: optional
+Standards-Version: 4.1.4
+
+Package: texlive-local
+Version: 2023.99999999-1
+Maintainer: you <you@yourdomain.example.org>
+Provides: asymptote, chktex, cm-super, cm-super-minimal, context,
+ dvidvi, dvipng, dvisvgm, feynmf, fragmaster, jadetex, lacheck, 
+ latex-cjk-all, latex-cjk-chinese, latex-cjk-chinese-arphic-bkai00mp,
+ latex-cjk-chinese-arphic-bsmi00lp, latex-cjk-chinese-arphic-gbsn00lp,
+ latex-cjk-chinese-arphic-gkai00mp, latex-cjk-common, latex-cjk-japanese,
+ latex-cjk-japanese-wadalab, latex-cjk-korean, latex-cjk-thai, latexdiff,
+ latexmk, latex-sanskrit, lcdf-typetools, lmodern, luatex,
+ musixtex, preview-latex-style, ps2eps, psutils, purifyeps, t1utils,
+ tex4ht, tex4ht-common, tex-gyre, texinfo, texlive, texlive-base,
+ texlive-bibtex-extra, texlive-binaries, texlive-common, texlive-extra-utils,
+ texlive-fonts-extra, texlive-fonts-extra-doc, texlive-fonts-recommended,
+ texlive-fonts-recommended-doc, texlive-font-utils, texlive-formats-extra,
+ texlive-games, texlive-humanities, texlive-humanities-doc, 
+ texlive-lang-all, texlive-lang-arabic, texlive-lang-cjk, texlive-lang-cyrillic,
+ texlive-lang-czechslovak, texlive-lang-english, texlive-lang-european,
+ texlive-lang-japanese, texlive-lang-chinese, texlive-lang-korean,
+ texlive-lang-french, texlive-lang-german, texlive-lang-greek,
+ texlive-lang-italian, texlive-lang-other,
+ texlive-lang-polish, texlive-lang-portuguese, texlive-lang-spanish,
+ texlive-latex-base, texlive-latex-base-doc, texlive-latex-extra,
+ texlive-latex-extra-doc, texlive-latex-recommended,
+ texlive-latex-recommended-doc, texlive-luatex, texlive-math-extra,
+ texlive-metapost, texlive-metapost-doc, texlive-music,
+ texlive-pictures, texlive-pictures-doc, texlive-plain-generic,
+ texlive-pstricks, texlive-pstricks-doc, texlive-publishers,
+ texlive-publishers-doc, texlive-science, texlive-science-doc, texlive-xetex,
+ thailatex, tipa, tipa-doc, xindy, xindy-rules
+Depends:
+Architecture: all
+Description: My local installation of TeX Live 2023.
+ A full "vanilla" TeX Live 2023
+ http://tug.org/texlive/debian#vanilla
+  #+end_src
+7) Create a dummy deb file and install it
+#+begin_src bash
+  equivs-build texlive-local
+  sudo dpkg -i texlive-local_2024_all.deb
+#+end_src
+
+* Troubleshoot
+** Font not found.
+  This was the case of ~augie~. The solution is to enable as an option in ~updmap-sys~ ([[https://tex.stackexchange.com/questions/353580/libertine-font-not-found-texlive][source]])
+  #+BEGIN_SRC BASH
+updmap-sys --enable Map=libertine.map
+  #+end_src
+** Configuration after installing texlive on windows
+The solution is to edit the file, fonts.conf located in =texlive/2022/texmf-var/fonts/conf/=. In this file add the following code:
+#+begin_src 
+<fontconfig>
+<!-- 
+	Find fonts in these directories
+
+       You can add other directories if you have additional fonts.
+       Example:
+<dir>C:/WINDOWS/fonts</dir>
+<dir>c:/usr/local/share/texmf/fonts/opentype/dnscreen/hiragino</dir>
+<dir>c:/usr/local/share/texmf/fonts/opentype/adobe/kozuka</dir>
+ To use "local.conf" for additional directories is recommended.
+-->
+
+<dir>C:/WINDOWS/fonts</dir>
+<dir>E:/Shared/texlive/2022/texmf-dist/fonts/opentype</dir>
+<dir>E:/Shared/texlive/2022/texmf-dist/fonts/truetype</dir>
+
+#+end_src
+
+
+Alternatively, the file texlive-fontconfig.conf can be edited in the same way. Note that the idea is to add both paths to the font folder, one for Linux and the other for Windows.
+
+*Note* After installing texlive on windows no texlive-fontconfig.conf file was found
+
+After this a full update must be performed,
+
+~fmtutil-sys --all~
+
+* Web links
+- [[https://tex.stackexchange.com/questions/1092/how-to-install-vanilla-texlive-on-debian-or-ubuntu#95373][Installation on Debian/Ubuntu [SE]​]]
+- [[https://wiki.debian.org/TeXLive][TeXLive on Debian [wiki]​]]
