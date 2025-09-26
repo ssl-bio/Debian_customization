@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Exec=quicktile --daemonize
+Hidden=false
+Name[en_US]=Quicktile
+Name=Quicktile
+Comment[en_US]=Window tiling manager
+Comment=Window tiling manager
+X-MATE-Autostart-Delay=0

@@ -1,24 +1,19 @@
 [General]
 fuzzy=true
 hotkey=Meta+Space
-last_used_version=0.20.14
 showTray=true
 telemetry=false
-terminal=Tilix
 
 [applications]
 enabled=true
+terminal=com.gexperts.Tilix
 use_generic_name=true
 use_keywords=true
-
-[terminal]
-enabled=false
 
 [widgetsboxmodel]
 alwaysOnTop=true
 clearOnHide=false
 clientShadow=true
-displayIcons=true
 displayScrollbar=false
 followCursor=true
 hideOnFocusLoss=true
@@ -26,7 +21,4 @@ historySearch=true
 itemCount=5
 quitOnClose=false
 showCentered=true
-showFallbacksOnEmpty=true
 systemShadow=true
-theme=Spotlight
-windowPosition=@Point(607 216)

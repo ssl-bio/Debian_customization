@@ -1,0 +1,8 @@
+alias ec='emacsclient -c &'
+alias font-update='fc-cache -f -v'
+
+# Safe versions of the default commands.
+# Will ask permissions before overwriting files.
+alias rm='trash-put'
+alias mv='mv -i'
+alias cat='batcat'

@@ -5,7 +5,11 @@
 
 ## Description
 
-Notes and scripts to customize a basic Debian stable (+ Mate Desktop Environment) installation. Briefly, these would expand the default repositories, install a number of programs and customize the window/desktop management. The list of programs can be divided into 3 groups with only the first one being recommended for the customization and the last 2 being entirely optional and highly subjective. Customization of the window/desktop management relies on the use of the following programs, *Compiz*, *Quicktile*, *Albert* and *Plank*, as well as, the modification of the default panels. The notes and scripts provide commands to backup the default configuration to facilitate reverting some of all of the changes.
+Notes and scripts to customize a basic Debian stable (+ Mate Desktop Environment) installation. Briefly, these would expand the default repositories, install a number of programs and customize the window/desktop management.
+
+The list of programs can be divided into several groups (indicated in the name of the files) with only the first one being recommended for the customization and the last 2 being entirely optional and highly subjective.
+
+Customization of the window/desktop management relies on the use of the following programs, *Compiz*, *Quicktile*, *Albert* and *Plank*, as well as, the modification of the default panels. The notes and scripts provide commands to backup the default configuration to facilitate reverting some of all of the changes.
 
 
 ### Notes
@@ -27,24 +31,47 @@ Note files are written in Emacs `org-roam` format (an extension of `org-mode`) w
 
 ### Scripts
 
-A number of scripts to automate the customization are provided. It is recommended to carefully read all of them (or the `20250107103006-debian_customization.org` file, mentioned above) to see which software is going to be installed before their execution.
+/ It is recommended to carefully read them to see which software is going to be installed before their execution./
 
-To execute them download the whole repository into the home directory and execute the scripts from its folder (`$HOME/Debian_customization/Scripts`). Below is a sample code of how to run all of them.
+A number of scripts to automate the customization are provided. Despite being highly subjective the scripts are numbered according to their relevance. After the number a string indicates whether the script should be run as a regular- or super-user. A brief description of the script is included in the name and inside each script.
+
+To execute them download the whole repository and execute the scripts from its folder (`$HOME/Debian_customization/Scripts`). Below is a sample code of how to run all of them.
 
 ```bash
-sudo ./Debian_customization_1.sh && ./Debian_customization_1_aux.sh &&\
-      sudo ./Debian_customization_2.sh && ./Debian_customization_2_aux.sh &&\
-      sudo ./Debian_customization_3.sh && ./Debian_customization_3_aux.sh
+sudo ./01_sudo_Repo_setup_First_program_batch.sh &&\
+./02_user_Backup_configuration.sh &&\
+sudo ./03_sudo_Second_program_batch.sh &&\
+./04_user_Configuration_and_Third_program_batch.sh &&\
+sudo ./05_sudo_Dependencies_and_Fourth_program_batch.sh &&\
+./06_user_Yazi_with_Rust_installation.sh &&\
+./07_user_Personalization.sh &&\
+sudo ./08_sudo_Flatpak_config_installation.sh &&\
+sudo ./09_sudo_NonFree.sh
 ```
 
-Note that some of the scripts need to be run as super user while others should be run as a regular user. The former would reduce the number of times it is required to type the superuser password while the latter would configure some program options that need to be run as a regular user. Depending on the computer resources or internet connection the execution may require to type the superuser password more than once, especially when starting a new script.
+The first script (`01_sudo_Repo_setup_First_program_batch.sh`) will change the default shell from `bash` to `zsh`. For the changes to take effect it is required to reboot the system. Then, the following script will add to the corresponding shell configuration file (`.zshrc`) the settings for using Miniconda and changing the shell's prompt.
+
+```bash
+./10_user_PostReboot_Miniconda_and_shell_setup.sh
+```
+
+*Note that the full setup will take about 30Gb of disk space.*
 
 
-## Configuration files
+### Helper functions
 
-Both, the main org-file and the scripts, make use of a number of configuration file for the customization. These are organized into program/categories folders (*e.g.* bash, system) and it is in these folders where the backups would be stored.
+In this file a set of variables such as the Debian version to be installed (*e.g.* `trixie`) are defined as well as some functions to log the progress of the installation and get the directory where to download additional files.
 
 
-## Download folder
+### Configuration files
 
-The script will create a directory to store all the installation files in the home directory `$HOME/Download_installation` while the org-file provides a function to get the default download directory (which may be different depending on the localization of the system). The latter requires to import a file with custom functions.
+The scripts, make use of a number of configuration files for the customization. These are organized into program/categories folders (*e.g.* shell, system) and it is in these folders where the backups would be stored.
+
+1.  Manual configuration
+
+    Compiz configuration requires to import the file (`Configuration_files/compiz/compiz_debian_custom.profile`) from `CompizConfig Settings Manager` (CCSM) using the Preferences option.
+
+
+### Download folder
+
+The script will create a directory to store all the installation files in the download directory in a folder `Installation_files`. This can be reused in other installations by placing at the same level as the `Scripts` folder.

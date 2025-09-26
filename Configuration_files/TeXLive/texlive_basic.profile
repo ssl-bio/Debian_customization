@@ -1,0 +1,13 @@
+selected_scheme scheme-basic
+TEXDIR /usr/local/texlive/2025
+TEXMFCONFIG ~/.texlive2025/texmf-config
+TEXMFHOME ~/.texlive2025/
+TEXMFLOCAL /usr/local/texlive/texmf-local
+TEXMFSYSCONFIG /usr/local/texlive/2025/texmf-config
+TEXMFSYSVAR /usr/local/texlive/2025/texmf-var
+TEXMFVAR ~/.texlive2025/texmf-var
+binary_x86_64-linux 1
+collection-basic 1
+collection-latex 1
+collection-fontsrecommended 1
+collection-langenglish 1

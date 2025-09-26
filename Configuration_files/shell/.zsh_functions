@@ -1,0 +1,27 @@
+# Check if dir exists if not create it
+dir_exist() {
+    if [[ ! -d $1 ]]
+    then
+	mkdir -p "$1"
+    fi
+}
+
+# Find file
+findf() {
+    find . -name "${1}*"
+}
+
+# Get user directory as defined in ~/.config/user-dirs.dirs
+get_user_dir() {
+    local user_dir="$1"
+    local var_name="$2"
+    # if [[ -z "${!var_name}" ]]; then
+    local temp
+    temp=$(grep "^${user_dir}=" ~/.config/user-dirs.dirs | sed "s/${user_dir}=//g")
+    local resolved_dir
+    resolved_dir="$(eval echo "$temp")"
+
+    # Dynamically assign the value to the variable name passed as $2
+    printf -v "$var_name" "%s" "$resolved_dir"
+    # fi
+}

@@ -1,0 +1,97 @@
+# Set up the prompt
+# autoload -Uz promptinit
+# promptinit
+# prompt adam1
+
+# Initialize starship
+eval "$(starship init zsh)"
+
+# Extend the program search PATH and add the ~/bin folder.
+# export PATH=~/.local/bin:$PATH
+
+#History behaviour
+setopt histignorealldups sharehistory
+
+# Use emacs keybindings even if our EDITOR is set to vi
+bindkey -e
+
+# Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
+HISTSIZE=10000
+SAVEHIST=8000
+HISTFILE=~/.zsh_history
+
+# Completion
+# Load modern completion system
+autoload -Uz compinit
+compinit
+
+# Load complist for interactive menu selection
+zmodload zsh/complist
+
+# Completion system styles
+zstyle ':completion:*' auto-description 'specify: %d'
+zstyle ':completion:*' completer _expand _complete _correct _approximate
+zstyle ':completion:*' format 'Completing %d'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' menu select  # enable menu selection on first TAB
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle ':completion:*' use-compctl false
+zstyle ':completion:*' verbose true
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+
+# Special style for kill command process list
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+
+# Use dircolors
+eval "$(dircolors -b)"
+
+# Enable Emacs-style navigation in completion menu
+bindkey -M menuselect '^P' up-line-or-history
+bindkey -M menuselect '^N' down-line-or-history
+bindkey -M menuselect '^B' backward-char
+bindkey -M menuselect '^F' forward-char
+
+# Delete words
+backward-kill-dir() {
+    local WORDCHARS=${WORDCHARS/\/}
+    zle backward-kill-word
+}
+
+zle -N backward-kill-dir
+bindkey '\e^?' backward-kill-dir
+
+
+# Alias definitions.
+if [ -f "$HOME"/.zsh_aliases ]; then
+    . "$HOME"/.zsh_aliases
+fi
+
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls -h --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    #alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# Import custom functions
+if [ -f "$HOME"/.zsh_functions ]; then
+    . "$HOME"/.zsh_functions
+fi
+
+# fzf shortcuts
+source /usr/share/doc/fzf/examples/key-bindings.zsh 
+
+# zoxide
+# eval "$(zoxide init --cmd cd bash)"
+eval "$(zoxide init zsh)"
+
+# Rust
+. "$HOME/.cargo/env"
+
