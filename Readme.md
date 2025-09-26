@@ -75,3 +75,9 @@ The scripts, make use of a number of configuration files for the customization. 
 ### Download folder
 
 The script will create a directory to store all the installation files in the download directory in a folder `Installation_files`. This can be reused in other installations by placing at the same level as the `Scripts` folder.
+
+
+## To do
+
+-   [ ] Improve log function to report errors
+-   [ ] Update notes
